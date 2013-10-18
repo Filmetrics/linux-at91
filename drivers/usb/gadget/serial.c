@@ -26,7 +26,8 @@
 #define GS_VERSION_NUM			0x2400
 
 #define GS_LONG_NAME			"Gadget Serial"
-#define GS_VERSION_NAME			GS_LONG_NAME " " GS_VERSION_STR
+// Was: #define GS_VERSION_NAME			GS_LONG_NAME " " GS_VERSION_STR
+#define GS_VERSION_NAME			"FI Instrument"  // For Filmetrics
 
 /*-------------------------------------------------------------------------*/
 
@@ -54,9 +55,11 @@
 * DO NOT REUSE THESE IDs with a protocol-incompatible driver!!  Ever!!
 * Instead:  allocate your own, using normal USB-IF procedures.
 */
-#define GS_VENDOR_ID			0x0525	/* NetChip */
+// Was: #define GS_VENDOR_ID			0x0525	/* NetChip */
+#define GS_VENDOR_ID			0x116D	/* Filmetrics */
 #define GS_PRODUCT_ID			0xa4a6	/* Linux-USB Serial Gadget */
-#define GS_CDC_PRODUCT_ID		0xa4a7	/* ... as CDC-ACM */
+// Was: #define GS_CDC_PRODUCT_ID		0xa4a7	/* ... as CDC-ACM */
+#define GS_CDC_PRODUCT_ID		0x0080	/* Filmetrics device */
 #define GS_CDC_OBEX_PRODUCT_ID		0xa4a9	/* ... as CDC-OBEX */
 
 /* string IDs are assigned dynamically */
