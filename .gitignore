@@ -85,3 +85,7 @@ GTAGS
 *.orig
 *~
 \#*#
+
+# Ignore Vim swap files
+.*.swp
+*.swp
