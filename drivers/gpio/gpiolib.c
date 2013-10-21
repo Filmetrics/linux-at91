@@ -1668,6 +1668,16 @@ void __gpio_set_value(unsigned gpio, int value)
 	struct gpio_chip	*chip;
 
 	chip = gpio_to_chip(gpio);
+
+
+	//// Print out every GPIO set (except blue LED) -- RGO
+	if (gpio != 153)  // blue led
+	{
+		printk("__gpio_set_value(): gpio = %u, value = %d\n", gpio, value); ////
+		printk("label = %s, base = %d, ngpio = %d\n\n", chip->label, chip->base, chip->ngpio); ////
+	}
+
+
 	/* Should be using gpio_set_value_cansleep() */
 	WARN_ON(chip->can_sleep);
 	trace_gpio_value(gpio, 0, value);
