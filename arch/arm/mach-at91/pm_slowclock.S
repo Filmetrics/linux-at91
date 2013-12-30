@@ -139,6 +139,13 @@ tmp2	.req	r5
 	dmb
 
 	/*
+	 * AT91 PMC: Switch off Processor Clock
+	 *
+	 */
+	mov	tmp1, #AT91_PMC_PCK
+	str	tmp1, [pmc, #AT91_PMC_SCDR]
+
+	/*
 	 * Execute a WFI instruction and wait until the
 	 * STANDBYWFI output is asserted to indicate that the
 	 * CPU is in idle and low power state. CPU can specualatively
@@ -272,6 +279,10 @@ sdr_sr_done:
 	orr	tmp1, tmp1, #(1 << 29)		/* bit 29 always set */
 	str	tmp1, [pmc, #AT91_CKGR_PLLAR]
 
+	/* Disable DDRCK (SAMA5D3) */
+	mov 	tmp1, #(1 << 2)
+	str	tmp1, [pmc, #AT91_PMC_SCDR]
+
 	/* Save PLLB setting and disable it */
 	ldr	tmp1, [pmc, #AT91_CKGR_PLLBR]
 	str	tmp1, .saved_pllbr
@@ -287,6 +298,7 @@ sdr_sr_done:
 	/* Turn off the main oscillator */
 	ldr	tmp1, [pmc, #AT91_CKGR_MOR]
 	bic	tmp1, tmp1, #AT91_PMC_MOSCEN
+	orr	tmp1, tmp1, #AT91_PMC_KEY
 	str	tmp1, [pmc, #AT91_CKGR_MOR]
 
 	/* Wait for interrupt */
@@ -295,6 +307,7 @@ sdr_sr_done:
 	/* Turn on the main oscillator */
 	ldr	tmp1, [pmc, #AT91_CKGR_MOR]
 	orr	tmp1, tmp1, #AT91_PMC_MOSCEN
+	orr	tmp1, tmp1, #AT91_PMC_KEY
 	str	tmp1, [pmc, #AT91_CKGR_MOR]
 
 	wait_moscrdy
@@ -318,6 +331,10 @@ sdr_sr_done:
 
 	wait_uplllock
 
+	/* Enable DDRCK (SAMA5D3) */
+	mov 	tmp1, #(1 << 2)
+	str	tmp1, [pmc, #AT91_PMC_SCER]
+
 	/* Restore PLLA setting */
 	ldr	tmp1, .saved_pllar
 	str	tmp1, [pmc, #AT91_CKGR_PLLAR]
@@ -329,7 +346,6 @@ sdr_sr_done:
 3:
 	wait_pllalock
 4:
-
 #ifdef SLOWDOWN_MASTER_CLOCK
 	/*
 	 * First set PRES if it was not 0,

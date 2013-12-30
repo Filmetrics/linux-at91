@@ -133,6 +133,14 @@ void __init at91_config_isi(bool use_pck_as_mck, const char *pck_id)
 	}
 }
 
+static unsigned int camera_reset_pin;
+static unsigned int camera_power_pin;
+static void camera_set_gpio_pins(uint reset_pin, uint power_pin)
+{
+	camera_reset_pin = reset_pin;
+	camera_power_pin = power_pin;
+}
+
 /*
  * soc-camera OV2640
  */
@@ -144,79 +152,27 @@ static unsigned long isi_camera_query_bus_param(struct soc_camera_link *link)
 	return SOCAM_DATAWIDTH_8;
 }
 
-static int i2c_camera_power_revB(struct device *dev, int on)
-{
-	int res, ret = 0;
-
-	pr_debug("%s: %s the camera\n", __func__, on ? "ENABLE" : "DISABLE");
-
-	res = devm_gpio_request(dev, AT91_PIN_PE29, "ov2640_power");
-	if (res < 0) {
-		printk("can't request ov2640_power pin\n");
-		return -1;
-	}
-
-	res = devm_gpio_request(dev, AT91_PIN_PE28, "ov2640_reset");
-	if (res < 0) {
-		printk("can't request ov2640_reset pin\n");
-		devm_gpio_free(dev, AT91_PIN_PE29);
-		return -1;
-	}
-
-	/* enable or disable the camera */
-	res = gpio_direction_output(AT91_PIN_PE29, !on);
-	if (res < 0) {
-		printk("can't request output direction for ov2640_power pin\n");
-		ret = -1;
-		goto out;
-	}
-
-	if (!on)
-		goto out;
-
-	/* If enabled, give a reset impulse */
-	res = gpio_direction_output(AT91_PIN_PE28, 0);
-	if (res < 0) {
-		printk("can't request output direction for ov2640_reset pin\n");
-		ret = -1;
-		goto out;
-	}
-	msleep(20);
-	res = gpio_direction_output(AT91_PIN_PE28, 1);
-	if (res < 0) {
-		printk("can't request output direction for ov2640_reset pin\n");
-		ret = -1;
-		goto out;
-	}
-	msleep(100);
-
-out:
-	devm_gpio_free(dev, AT91_PIN_PE28);
-	devm_gpio_free(dev, AT91_PIN_PE29);
-	return ret;
-}
-
 static int i2c_camera_power(struct device *dev, int on)
 {
 	int res, ret = 0;
 
 	pr_debug("%s: %s the camera\n", __func__, on ? "ENABLE" : "DISABLE");
 
-	res = devm_gpio_request(dev, AT91_PIN_PE29, "ov2640_power");
+	res = devm_gpio_request(dev, camera_power_pin, "ov2640_power");
 	if (res < 0) {
 		printk("can't request ov2640_power pin\n");
 		return -1;
 	}
 
-	res = devm_gpio_request(dev, AT91_PIN_PE24, "ov2640_reset");
+	res = devm_gpio_request(dev, camera_reset_pin, "ov2640_reset");
 	if (res < 0) {
 		printk("can't request ov2640_reset pin\n");
-		devm_gpio_free(dev, AT91_PIN_PE29);
+		devm_gpio_free(dev, camera_power_pin);
 		return -1;
 	}
 
 	/* enable or disable the camera */
-	res = gpio_direction_output(AT91_PIN_PE29, !on);
+	res = gpio_direction_output(camera_power_pin, !on);
 	if (res < 0) {
 		printk("can't request output direction for ov2640_power pin\n");
 		ret = -1;
@@ -227,14 +183,14 @@ static int i2c_camera_power(struct device *dev, int on)
 		goto out;
 
 	/* If enabled, give a reset impulse */
-	res = gpio_direction_output(AT91_PIN_PE24, 0);
+	res = gpio_direction_output(camera_reset_pin, 0);
 	if (res < 0) {
 		printk("can't request output direction for ov2640_reset pin\n");
 		ret = -1;
 		goto out;
 	}
 	msleep(20);
-	res = gpio_direction_output(AT91_PIN_PE24, 1);
+	res = gpio_direction_output(camera_reset_pin, 1);
 	if (res < 0) {
 		printk("can't request output direction for ov2640_reset pin\n");
 		ret = -1;
@@ -243,18 +199,28 @@ static int i2c_camera_power(struct device *dev, int on)
 	msleep(100);
 
 out:
-	devm_gpio_free(dev, AT91_PIN_PE24);
-	devm_gpio_free(dev, AT91_PIN_PE29);
+	devm_gpio_free(dev, camera_reset_pin);
+	devm_gpio_free(dev, camera_power_pin);
 	return ret;
 }
 
-static struct i2c_board_info i2c_camera = {
+static struct i2c_board_info i2c_ov2640 = {
 	I2C_BOARD_INFO("ov2640", 0x30),
+};
+static struct i2c_board_info i2c_ov5640 = {
+	I2C_BOARD_INFO("ov5642", 0x3c),
 };
 
 static struct soc_camera_link iclink_ov2640 = {
 	.bus_id			= -1,
-	.board_info		= &i2c_camera,
+	.board_info		= &i2c_ov2640,
+	.i2c_adapter_id		= 0,
+	.power			= i2c_camera_power,
+	.query_bus_param	= isi_camera_query_bus_param,
+};
+static struct soc_camera_link iclink_ov5640 = {
+	.bus_id			= -1,
+	.board_info		= &i2c_ov5640,
 	.i2c_adapter_id		= 0,
 	.power			= i2c_camera_power,
 	.query_bus_param	= isi_camera_query_bus_param,
@@ -267,16 +233,18 @@ static struct platform_device isi_ov2640 = {
 		.platform_data = &iclink_ov2640,
 	},
 };
+static struct platform_device isi_ov5640 = {
+	.name	= "soc-camera-pdrv",
+	.id	= 1,
+	.dev	= {
+		.platform_data = &iclink_ov5640,
+	},
+};
 
 static struct platform_device *devices[] __initdata = {
 	&isi_ov2640,
+	&isi_ov5640,
 };
-#else
-static struct soc_camera_link iclink_ov2640;
-static int i2c_camera_power_revB(struct device *dev, int on)
-{
-	return -1;
-}
 #endif
 
 struct of_dev_auxdata at91_auxdata_lookup[] __initdata = {
@@ -286,6 +254,7 @@ struct of_dev_auxdata at91_auxdata_lookup[] __initdata = {
 	OF_DEV_AUXDATA("atmel,at91sam9x5-lcd", 0xf0030140, "atmel_hlcdfb_ovl1", &ek_lcdc_data),
 	OF_DEV_AUXDATA("atmel,at91sam9x5-lcd", 0xf0030240, "atmel_hlcdfb_ovl2", &ek_lcdc_data),
 	OF_DEV_AUXDATA("atmel,at91sam9g45-isi", 0xf0034000, "atmel_isi", &isi_data),
+	OF_DEV_AUXDATA("atmel,at91sam9g45-isi", 0xf8048000, "atmel_isi", &isi_data),
 	{ /* sentinel */ }
 };
 
@@ -357,10 +326,11 @@ static void __init at91_dt_device_init(void)
 				switch (mb_rev) {
 				case 'A':
 				case 'B':
+					camera_set_gpio_pins(AT91_PIN_PE28, AT91_PIN_PE29);
 					at91_config_isi(true, "pck2");
-					iclink_ov2640.power = i2c_camera_power_revB;
 					break;
 				default:
+					camera_set_gpio_pins(AT91_PIN_PE24, AT91_PIN_PE29);
 					at91_config_isi(true, "pck1");
 					break;
 				}
@@ -393,6 +363,16 @@ static void __init at91_dt_device_init(void)
 				ek_lcdc_data.default_monspecs->modedb->lower_margin = 2;
 				ek_lcdc_data.default_monspecs->modedb->hsync_len = 41;
 				ek_lcdc_data.default_monspecs->modedb->vsync_len = 11;
+			}
+		}
+	} else if (of_machine_is_compatible("atmel,at91sam9x5ek")) {
+		struct device_node *np;
+
+		np = of_find_compatible_node(NULL, NULL, "atmel,at91sam9g45-isi");
+		if (np) {
+			if (of_device_is_available(np)) {
+				camera_set_gpio_pins(AT91_PIN_PA7, AT91_PIN_PA13);
+				at91_config_isi(true, "pck0");
 			}
 		}
 	}

@@ -13,7 +13,7 @@
 	compatible = "atmel,at91sam9x5ek", "atmel,at91sam9x5", "atmel,at91sam9";
 
 	chosen {
-		bootargs = "128M console=ttyS0,115200 root=/dev/mtdblock1 rw rootfstype=ubifs ubi.mtd=1 root=ubi0:rootfs";
+		bootargs = "console=ttyS0,115200 root=/dev/mtdblock1 rw rootfstype=ubifs ubi.mtd=1 root=ubi0:rootfs";
 	};
 
 	ahb {
@@ -38,6 +38,11 @@
 				};
 			};
 
+			isi: isi@f8048000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&pinctrl_isi &pinctrl_isi_pck_as_mck &pinctrl_isi_power &pinctrl_isi_reset>;
+			};
+
 			pinctrl@fffff400 {
 				board {
 					pinctrl_mmc0_cd: mmc0_cd {
@@ -48,6 +53,16 @@
 					pinctrl_mmc1_cd: mmc1_cd {
 						atmel,pins =
 							<3 14 0x0 0x5>;	/* PD14 gpio with pullup deglitch */
+					};
+
+					pinctrl_isi_reset: isi_reset-0 {
+						atmel,pins =
+							<0 7 0x0 0x0>;   /* PA7 gpio, conflicted with TXD2, SPI0_NPCS1 */
+					};
+
+					pinctrl_isi_power: isi_power-0 {
+						atmel,pins =
+							<0 13 0x0 0x0>; /* PA13 gpio, conflicted with SPI0_SPCK, MCI1_CK */
 					};
 				};
 			};
@@ -79,6 +94,10 @@
 				};
 			};
 
+			ssc0: ssc@f0010000 {
+				status = "okay";
+			};
+
 			macb0: ethernet@f802c000 {
 				phy-mode = "rmii";
 			};
@@ -89,6 +108,11 @@
 
 			i2c0: i2c@f8010000 {
 				status = "okay";
+
+				wm8731: wm8731@1a {
+					compatible = "wm8731";
+					reg = <0x1a>;
+				};
 			};
 		};
 
@@ -104,5 +128,20 @@
 		usb1: ehci@00700000 {
 			status = "okay";
 		};
+	};
+
+	sound {
+		compatible = "atmel,sam9x5-wm8731-audio";
+
+		atmel,model = "wm8731 @ AT91SAM9X5EK";
+
+		atmel,audio-routing =
+			"Headphone Jack", "RHPOUT",
+			"Headphone Jack", "LHPOUT",
+			"LLINEIN", "Line In Jack",
+			"RLINEIN", "Line In Jack";
+
+		atmel,ssc-controller = <&ssc0>;
+		atmel,audio-codec = <&wm8731>;
 	};
 };

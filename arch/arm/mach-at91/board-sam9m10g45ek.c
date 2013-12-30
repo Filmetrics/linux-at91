@@ -246,6 +246,26 @@ static struct platform_device isi_ov2640 = {
 		.platform_data = &iclink_ov2640,
 	},
 };
+
+static struct i2c_board_info i2c_ov5640 = {
+	I2C_BOARD_INFO("ov5642", 0x3c),
+};
+
+static struct soc_camera_link iclink_ov5640 = {
+	.bus_id			= 0,
+	.board_info		= &i2c_ov5640,
+	.i2c_adapter_id		= 0,
+	.power			= i2c_camera_power,
+	.query_bus_param	= isi_camera_query_bus_param,
+};
+
+static struct platform_device isi_ov5640 = {
+	.name	= "soc-camera-pdrv",
+	.id	= 1,
+	.dev	= {
+		.platform_data = &iclink_ov5640,
+	},
+};
 #endif
 
 
@@ -454,6 +474,7 @@ static struct platform_device *devices[] __initdata = {
 #if defined(CONFIG_SOC_CAMERA_OV2640) || \
 	defined(CONFIG_SOC_CAMERA_OV2640_MODULE)
 	&isi_ov2640,
+	&isi_ov5640,
 #endif
 };
 
