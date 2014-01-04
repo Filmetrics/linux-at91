@@ -46,6 +46,10 @@
 				};
 			};
 
+			i2c2: i2c@f801c000 {
+				status = "okay";
+			};
+
 			macb0: ethernet@f0028000 {
 				status = "okay";
 			};
