@@ -20,7 +20,7 @@
 
 	ahb {
 		apb {
-			spi0: spi@f0004000 {
+			spi1: spi@f8008000 {
 				status = "okay";
 			};
 

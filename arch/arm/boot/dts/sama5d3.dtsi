@@ -268,6 +268,12 @@
 				dma-mask = <0xffffffff>;
 				dma = <&dma1 0x100026f0>;
 				status = "disabled";
+
+				spidev: spidev@3 {
+					compatible = "spidev";
+					spi-max-frequency = <1000000>;
+					reg = <3>;
+				};
 			};
 
 			ssc1: ssc@f800c000 {
