@@ -49,10 +49,11 @@
  */
 static struct fb_videomode at91_tft_vga_modes[] = {
 	{
-		.name		= "LG",
+		.name		= "Displaytech",
 		.refresh	= 60,
-		.xres		= 800,		.yres		= 480,
-		.pixclock	= KHZ2PICOS(33260),
+		.xres		= 240,		.yres		= 320,
+		.pixclock	= KHZ2PICOS(13824),  // VSYNC = 60 Hz
+				                     // 240 x 320 x 3 x 0.06 kHz
 
 		.left_margin	= 88,		.right_margin	= 168,
 		.upper_margin	= 8,		.lower_margin	= 37,
@@ -64,8 +65,8 @@ static struct fb_videomode at91_tft_vga_modes[] = {
 };
 
 static struct fb_monspecs at91fb_default_monspecs = {
-	.manufacturer	= "LG",
-	.monitor	= "LB043WQ1",
+	.manufacturer	= "Displaytech",
+	.monitor	= "DT028ATFT",
 
 	.modedb		= at91_tft_vga_modes,
 	.modedb_len	= ARRAY_SIZE(at91_tft_vga_modes),
@@ -75,8 +76,8 @@ static struct fb_monspecs at91fb_default_monspecs = {
 	.vfmax		= 67,
 };
 
-/* Default output mode is TFT 24 bit */
-#define BPP_OUT_DEFAULT_LCDCFG5	(LCDC_LCDCFG5_MODE_OUTPUT_24BPP)
+/* Default output mode is TFT 18 bit */
+#define BPP_OUT_DEFAULT_LCDCFG5	(LCDC_LCDCFG5_MODE_OUTPUT_18BPP)
 
 /* Driver datas */
 static struct atmel_lcdfb_info __initdata ek_lcdc_data = {
@@ -84,7 +85,7 @@ static struct atmel_lcdfb_info __initdata ek_lcdc_data = {
 	.alpha_enabled			= false,
 	.default_bpp			= 16,
 	/* Reserve enough memory for 32bpp */
-	.smem_len			= 800 * 480 * 4,
+	.smem_len			= 240 * 320 * 4,
 	/* default_lcdcon2 is used for LCDCFG5 */
 	.default_lcdcon2		= BPP_OUT_DEFAULT_LCDCFG5,
 	.default_monspecs		= &at91fb_default_monspecs,
