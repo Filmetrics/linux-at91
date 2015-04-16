@@ -48,7 +48,14 @@
 
 			i2c2: i2c@f801c000 {
 				status = "okay";
+
+				24c64@51 {
+					compatible = "24c64";
+					reg = <0x51>;
+					pagesize = <32>;
+				};
 			};
+
 
 			macb0: ethernet@f0028000 {
 				status = "okay";
