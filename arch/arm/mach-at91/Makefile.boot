@@ -50,3 +50,5 @@ dtb-$(CONFIG_MACH_AT91SAM_DT) += sama5d34ek_pda.dtb
 dtb-$(CONFIG_MACH_AT91SAM_DT) += sama5d35ek.dtb
 dtb-$(CONFIG_MACH_AT91SAM_DT) += sama5d36ek.dtb
 dtb-$(CONFIG_MACH_AT91SAM_DT) += sama5d36ek_pda.dtb
+# Filmetrics Smart Instrument Board
+dtb-$(CONFIG_MACH_AT91SAM_DT) += smartinstr.dtb
