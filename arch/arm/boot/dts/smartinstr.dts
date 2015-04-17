@@ -50,6 +50,11 @@
 					reg = <0x51>;
 					pagesize = <32>;
 				};
+
+				ds1682@6b {
+					compatible = "dallas,ds1682";
+					reg = <0x6b>;
+				};
 			};
 
 			macb0: ethernet@f0028000 {
