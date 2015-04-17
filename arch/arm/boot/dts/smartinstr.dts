@@ -35,17 +35,11 @@
 			};
 
 			i2c0: i2c@f0014000 {
-				status = "okay";
+				status = "disabled";
 			};
 
 			i2c1: i2c@f0018000 {
-				status = "okay";
-
-				24c256@50 {
-					compatible = "24c256";
-					reg = <0x50>;
-					pagesize = <64>;
-				};
+				status = "disabled";
 			};
 
 			i2c2: i2c@f801c000 {
@@ -58,7 +52,6 @@
 				};
 			};
 
-
 			macb0: ethernet@f0028000 {
 				status = "okay";
 			};
@@ -70,9 +63,5 @@
 			label = "d3";
 			gpios = <&pioE 24 0>;
 		};
-	};
-
-	sound {
-		status = "okay";
 	};
 };
