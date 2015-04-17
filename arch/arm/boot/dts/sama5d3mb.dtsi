@@ -141,8 +141,8 @@
 		usb1: ohci@00600000 {
 			num-ports = <3>;
 			atmel,vbus-gpio = <&pioD 25 0
-					   &pioD 26 0 /* was 1 -- changed for SI board. RGO Filmetrics */
-					   &pioD 27 0 /* was 1 -- changed for SI board. RGO Filmetrics */
+					   &pioD 26 1
+					   &pioD 27 1
 					  >;
 			status = "okay";
 		};
