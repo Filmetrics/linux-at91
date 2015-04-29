@@ -65,7 +65,7 @@ static struct fb_videomode at91_tft_vga_modes[] = {
 };
 
 static struct fb_monspecs at91fb_default_monspecs = {
-	.manufacturer	= "Displaytech",
+	.manufacturer	= "DT",		// 3 chars max!
 	.monitor	= "DT028ATFT",
 
 	.modedb		= at91_tft_vga_modes,
