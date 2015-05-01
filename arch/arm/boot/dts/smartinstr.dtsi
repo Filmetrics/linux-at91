@@ -401,6 +401,11 @@
 				dma-rx = <&dma1 0x2000020a>;
 				atmel,use-dma-tx;
 				dma-tx = <&dma1 0x10002090>;
+
+				/* Configure USART3 as RS-485 */
+				linux,rs485-enabled-at-boot-time;
+				rs485-rts-delay = <0 0>;
+
 				pinctrl-names = "default";
 				pinctrl-0 = <&pinctrl_usart3>;
 				status = "disabled";
