@@ -17,4 +17,30 @@ config FAN_TACH
 	  To compile this driver as a module, choose M here: the module will
 	  be called fan_tach.
 
+if FAN_TACH
+
+comment "Driver Parameters"
+
+config FAN_TACH_TIMER_PERIOD_ms
+	int "Fan tach signal sampling period, in milliseconds"
+	default 50
+	help
+	  Fan tach signal sampling period, in milliseconds.
+	  This has to be faster than the fastest possible fan tach signal from
+	  either fan.
+
+config FAN_TACH_REFRESH_RATE_FAN1_ms
+	int "Refresh rate for fan #1, in milliseconds"
+	default 2000
+	help
+	  Fan #1 plugs into connector J3 (3 pin connector).
+
+config FAN_TACH_REFRESH_RATE_FAN2_ms
+	int "Refresh rate for fan #2, in milliseconds"
+	default 2000
+	help
+	  Fan #2 plugs into connector J12 (4 pin connector).
+
+endif # FAN_TACH
+
 endmenu

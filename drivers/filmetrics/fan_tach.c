@@ -24,15 +24,23 @@
 #define DEVICE_NAME		"fan_tach"
 #define FAN_TACH_MAJOR		240
 
-#ifndef TIMER_PERIOD_ms
-#define TIMER_PERIOD_ms		50
+
+/* CONFIG_FAN_TACH_* parameters are set in the kernel's make menuconfig */
+#ifdef CONFIG_FAN_TACH_TIMER_PERIOD_ms
+#define TIMER_PERIOD_ms		CONFIG_FAN_TACH_TIMER_PERIOD_ms
+#else
+#define TIMER_PERIOD_ms		100
 #endif
 
-#ifndef REFRESH_RATE_FAN1_ms
+#ifdef CONFIG_FAN_TACH_REFRESH_RATE_FAN1_ms
+#define REFRESH_RATE_FAN1_ms	CONFIG_FAN_TACH_REFRESH_RATE_FAN1_ms
+#else
 #define REFRESH_RATE_FAN1_ms	2000
 #endif
 
-#ifndef REFRESH_RATE_FAN2_ms
+#ifdef CONFIG_FAN_TACH_REFRESH_RATE_FAN2_ms
+#define REFRESH_RATE_FAN2_ms	CONFIG_FAN_TACH_REFRESH_RATE_FAN2_ms
+#else
 #define REFRESH_RATE_FAN2_ms	2000
 #endif
 
