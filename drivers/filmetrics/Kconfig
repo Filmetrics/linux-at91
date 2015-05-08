@@ -1,0 +1,20 @@
+#
+# Filmetrics Device Drivers
+#
+# For a description of the syntax of this configuration file,
+# see Documentation/kbuild/kconfig-language.txt.
+#
+
+menu "Filmetrics devices"
+
+config FAN_TACH
+	tristate "Fan Tach Measurement Driver"
+	default y
+	help
+	  This option enables the fan speed measurement device driver for the
+	  two on-board fans (fan #1, plugs into J3, and fan #2, plugs into J12).
+
+	  To compile this driver as a module, choose M here: the module will
+	  be called fan_tach.
+
+endmenu
