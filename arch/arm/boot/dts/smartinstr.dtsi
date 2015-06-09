@@ -271,10 +271,10 @@
 				dma = <&dma1 0x100026f0>;
 				status = "disabled";
 
-				spidev: spidev@3 {
+				spidev: spidev@0 {
 					compatible = "spidev";
 					spi-max-frequency = <1000000>;
-					reg = <3>;
+					reg = <0>;
 				};
 			};
 
