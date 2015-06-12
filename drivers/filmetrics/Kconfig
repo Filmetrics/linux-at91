@@ -7,6 +7,12 @@
 
 menu "Filmetrics devices"
 
+config FI_PROG_LOGIC
+	tristate "Filmetrics Programmable Logic IC Driver"
+	default y
+	help
+	  This option enables support for the Filmetrics Programmable Logic IC.
+
 config FAN_TACH
 	tristate "Fan Tach Measurement Driver"
 	default y
