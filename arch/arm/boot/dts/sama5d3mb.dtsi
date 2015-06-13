@@ -100,9 +100,9 @@
 							<3 18 0x0 0x5>; /* PD18 GPIO with pullup deglitch */
 					};
 
-					pinctrl_pck0_as_audio_mck: pck0_as_audio_mck {
+					pinctrl_pck1_prog_logic_clock: pck1_prog_logic_clock {
 						atmel,pins =
-							<3 30 0x2 0x0>;	/* PD30 periph B */
+							<3 31 0x2 0x0>;	/* PD31 periph B */
 					};
 
 					pinctrl_isi_reset: isi_reset-0 {
@@ -155,7 +155,7 @@
 	sound {
 		compatible = "atmel,sama5d3ek-wm8904";
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_pck0_as_audio_mck>;
+		pinctrl-0 = <&pinctrl_pck1_prog_logic_clock>;
 
 		atmel,model = "wm8904 @ SAMA5D3EK";
 		atmel,audio-routing =
