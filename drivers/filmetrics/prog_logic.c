@@ -24,6 +24,10 @@
 
 #define PORT_OUT_SHUTDOWN  AT91_PIN_PD0
 
+#define DEBUG		1
+
+#if DEBUG
+#define HSMC_MODE0	0xFFFFC610
 #define PIO_PSR_D	0xFFFFF808
 #define PIO_ABCDSR1_D	0xFFFFF870
 #define PIO_ABCDSR2_D	0xFFFFF874
@@ -31,9 +35,11 @@
 
 #define PRINT_REG(reg) \
 	printk(KERN_INFO DEVICE_NAME ": " #reg " = 0x%08X\n", read_reg(reg));
+#endif
 
 static struct clk *prog_logic_clock = NULL;
 
+#if DEBUG
 static unsigned int read_reg(unsigned int reg_addr)
 {
 	void *reg = ioremap(reg_addr, sizeof(unsigned int));
@@ -42,57 +48,69 @@ static unsigned int read_reg(unsigned int reg_addr)
 
 static void print_regs(void)
 {
+	PRINT_REG(HSMC_MODE0);
 	PRINT_REG(PIO_PSR_D);
 	PRINT_REG(PIO_ABCDSR1_D);
 	PRINT_REG(PIO_ABCDSR2_D);
 	PRINT_REG(PMC_PCK1);
 }
+#endif
 
 static int __init prog_logic_init(void)
 {
 	int err;
 	struct clk *mck = NULL;
 
-	printk(KERN_INFO DEVICE_NAME ": init [9]\n"); ////
+#if DEBUG
+	printk(KERN_INFO DEVICE_NAME ": init [10]\n"); ////
+#endif
 
 	/* Set up Shutdown GPIO pin: "LOW" turns programmable logic chip ON */
 	err = gpio_request_one(PORT_OUT_SHUTDOWN, GPIOF_OUT_INIT_LOW,
 				"GPIO_SHUTDOWN");
 	if (err != 0) goto gpio_fail;
 
-	// Clock pin set by sama5d3_wm8904 sound driver (DTSI modified)
-
-	/// gpio_free(AT91_PIN_PD31);
-	/// at91_set_B_periph(AT91_PIN_PD31, 0);
-
-	print_regs();
+	// Set pin PD31 to Peripheral B (PCK1)
+	// Note: at91_set_B_periph(AT91_PIN_PD31, 0) didn't seem to work, and
+	// returned -EINVAL. Hack: clock pin set by sama5d3_wm8904 sound driver
+	// instead (modified in the DTSI). TODO FIXME
 
 	/* Set up programmable logic's 66 MHz clock on PCK1 */
 	prog_logic_clock = clk_get(NULL, "pck1");
 	if (prog_logic_clock == NULL) {
-		err = -1;
+		err = -EINVAL;
 		goto clk_fail;
 	}
 
-	mck = clk_get(NULL, "mck");
+	mck = clk_get(NULL, "mck");  /* mck is the 132 MHz Master Clock */
 	if (mck == NULL) {
-		err = -1;
+		err = -EINVAL;
 		goto clk_fail;
 	}
-	clk_set_parent(prog_logic_clock, mck);  /// TODO - check retval...
-	clk_set_rate(prog_logic_clock, 66000000);  /// TODO - check retval...
+
+	err = clk_set_parent(prog_logic_clock, mck);
+	if (err != 0) goto clk_fail;
+
+	err = clk_set_rate(prog_logic_clock, 66000000);  /* 66 MHz */
+	if (err != 0 && err != 66000000)
+		goto clk_fail;
 
 	err = clk_prepare(prog_logic_clock);
-	if (err != 0) goto clk_fail;
+	if (err != 0)
+		goto clk_fail;
 
 	err = clk_enable(prog_logic_clock);
-	if (err != 0) goto clk_fail;
+	if (err != 0)
+		goto clk_fail;
+
+#if DEBUG
+	print_regs();
+#endif
 
 	return 0;  /* Init successful */
 
 clk_fail:
 	gpio_set_value(PORT_OUT_SHUTDOWN, 1);
-	gpio_direction_input(PORT_OUT_SHUTDOWN);
 	gpio_free(PORT_OUT_SHUTDOWN);
 
 gpio_fail:
@@ -104,9 +122,10 @@ static void __exit prog_logic_exit(void)
 {
 	clk_disable(prog_logic_clock);
 	gpio_set_value(PORT_OUT_SHUTDOWN, 1);
-	gpio_direction_input(PORT_OUT_SHUTDOWN);
 	gpio_free(PORT_OUT_SHUTDOWN);
+#if DEBUG
 	printk(KERN_INFO DEVICE_NAME ": exit\n"); ////
+#endif
 }
 
 module_init(prog_logic_init);
