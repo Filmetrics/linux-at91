@@ -71,9 +71,9 @@ static int __init prog_logic_init(void)
 	if (err != 0) goto gpio_fail;
 
 	// Set pin PD31 to Peripheral B (PCK1)
-	// Note: at91_set_B_periph(AT91_PIN_PD31, 0) didn't seem to work, and
-	// returned -EINVAL. Hack: clock pin set by sama5d3_wm8904 sound driver
-	// instead (modified in the DTSI). TODO FIXME
+	// Note: calling at91_set_B_periph(AT91_PIN_PD31, 0) didn't seem to
+	// work, and returned -EINVAL. Hack: clock pin set by sama5d3_wm8904
+	// sound driver instead (modified in the DTSI). TODO FIXME
 
 	/* Set up programmable logic's 66 MHz clock on PCK1 */
 	prog_logic_clock = clk_get(NULL, "pck1");

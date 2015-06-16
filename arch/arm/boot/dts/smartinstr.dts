@@ -69,4 +69,8 @@
 			gpios = <&pioE 24 0>;
 		};
 	};
+
+	sound {
+		status = "okay";
+	};
 };

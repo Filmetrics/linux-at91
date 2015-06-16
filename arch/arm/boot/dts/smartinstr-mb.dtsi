@@ -109,9 +109,9 @@
 							<3 18 0x0 0x5>; /* PD18 GPIO with pullup deglitch */
 					};
 
-					pinctrl_pck0_as_audio_mck: pck0_as_audio_mck {
+					pinctrl_pck1_prog_logic_clock: pck1_prog_logic_clock {
 						atmel,pins =
-							<3 30 0x2 0x0>;	/* PD30 periph B */
+							<3 31 0x2 0x0>;	/* PD31 periph B */
 					};
 
 					pinctrl_isi_reset: isi_reset-0 {
@@ -159,5 +159,28 @@
 		usb2: ehci@00700000 {
 			status = "okay";
 		};
+	};
+
+	/* Sound driver is only used to set the programmable logic clock pin
+	 * (PCK1, 66 MHz) to its correct configuration (peripheral B) using
+	 * pinctrl (note: calling at91_set_B_periph(AT91_PIN_PD31, 0) from the
+	 * prog_logic driver didn't seem to work, and returned -EINVAL).
+	 */
+	sound {
+		compatible = "atmel,sama5d3ek-wm8904";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_pck1_prog_logic_clock>;
+
+		atmel,model = "wm8904 @ SAMA5D3EK";
+		atmel,audio-routing =
+			"Headphone Jack", "HPOUTL",
+			"Headphone Jack", "HPOUTR",
+			"IN2L", "Line In Jack",
+			"IN2R", "Line In Jack",
+			"Mic", "MICBIAS",
+			"IN1L", "Mic";
+
+		atmel,ssc-controller = <&ssc0>;
+		atmel,audio-codec = <&wm8904>;
 	};
 };
