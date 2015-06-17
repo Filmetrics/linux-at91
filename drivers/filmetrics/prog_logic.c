@@ -27,6 +27,9 @@
 #define DEBUG		1
 
 #if DEBUG
+#define HSMC_SETUP0	0xFFFFC600
+#define HSMC_PULSE0	0xFFFFC604
+#define HSMC_CYCLE0	0xFFFFC608
 #define HSMC_MODE0	0xFFFFC610
 #define PIO_PSR_D	0xFFFFF808
 #define PIO_ABCDSR1_D	0xFFFFF870
@@ -42,12 +45,21 @@ static struct clk *prog_logic_clock = NULL;
 #if DEBUG
 static unsigned int read_reg(unsigned int reg_addr)
 {
-	void *reg = ioremap(reg_addr, sizeof(unsigned int));
+	void __iomem *reg = ioremap(reg_addr, sizeof(unsigned int));
 	return ioread32(reg);
+}
+
+static void write_reg(unsigned int reg_addr, unsigned int value)
+{
+	void __iomem *reg = ioremap(reg_addr, sizeof(unsigned int));
+	iowrite32(value, reg);
 }
 
 static void print_regs(void)
 {
+	PRINT_REG(HSMC_SETUP0);
+	PRINT_REG(HSMC_PULSE0);
+	PRINT_REG(HSMC_CYCLE0);
 	PRINT_REG(HSMC_MODE0);
 	PRINT_REG(PIO_PSR_D);
 	PRINT_REG(PIO_ABCDSR1_D);
@@ -63,6 +75,9 @@ static int __init prog_logic_init(void)
 
 #if DEBUG
 	printk(KERN_INFO DEVICE_NAME ": init [10]\n"); ////
+
+        write_reg(HSMC_PULSE0, 0x0A0A0101);
+        write_reg(HSMC_CYCLE0, 0x000E0003);
 #endif
 
 	/* Set up Shutdown GPIO pin: "LOW" turns programmable logic chip ON */
@@ -75,7 +90,7 @@ static int __init prog_logic_init(void)
 	// work, and returned -EINVAL. Hack: clock pin set by sama5d3_wm8904
 	// sound driver instead (modified in the DTSI). TODO FIXME
 
-	/* Set up programmable logic's 66 MHz clock on PCK1 */
+	/* Set up programmable logic's 132 MHz clock on PCK1 */
 	prog_logic_clock = clk_get(NULL, "pck1");
 	if (prog_logic_clock == NULL) {
 		err = -EINVAL;
@@ -91,8 +106,8 @@ static int __init prog_logic_init(void)
 	err = clk_set_parent(prog_logic_clock, mck);
 	if (err != 0) goto clk_fail;
 
-	err = clk_set_rate(prog_logic_clock, 66000000);  /* 66 MHz */
-	if (err != 0 && err != 66000000)
+	err = clk_set_rate(prog_logic_clock, 132000000);  /* 132 MHz */
+	if (err != 0 && err != 132000000)
 		goto clk_fail;
 
 	err = clk_prepare(prog_logic_clock);
