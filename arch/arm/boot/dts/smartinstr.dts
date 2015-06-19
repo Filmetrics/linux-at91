@@ -51,6 +51,12 @@
 					pagesize = <32>;
 				};
 
+				24c64@52 {
+					compatible = "24c64";
+					reg = <0x52>;
+					pagesize = <32>;
+				};
+
 				ds1682@6b {
 					compatible = "dallas,ds1682";
 					reg = <0x6b>;
