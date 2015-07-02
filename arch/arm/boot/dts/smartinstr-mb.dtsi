@@ -149,7 +149,12 @@
 
 		usb1: ohci@00600000 {
 			num-ports = <3>;
-			atmel,vbus-gpio = <&pioD 25 0
+			atmel,vbus-gpio = <&pioC 7 0   /* was pioD 25 0 -- changed
+							* for SI board to free up the
+							* "sleeping" I/O line to the PIC
+							* chip. RGO Filmetrics
+							*/
+
 					   &pioD 26 0 /* was 1 -- changed for SI board. RGO Filmetrics */
 					   &pioD 27 0 /* was 1 -- changed for SI board. RGO Filmetrics */
 					  >;
